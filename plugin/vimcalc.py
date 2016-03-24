@@ -101,7 +101,7 @@ class Lexeme(object):
 lexemes = [Lexeme('whitespace', r'\s+'),
            Lexeme('hexnumber',  r'0x[0-9a-fA-F]+'),
            Lexeme('octnumber',  r'0[0-7]+'),
-           Lexeme('decnumber',  r'[0-9]+(\.[0-9]+)?(e[+-]?[0-9]+)?'),
+           Lexeme('decnumber',  r'[0-9]*\.?([0-9]+)?([eE][+-]?[0-9]+)?'),
            Lexeme('let',        r'let'),
            Lexeme('ident',      r"[A-Za-z_][A-Za-z0-9_]*'?"),
            Lexeme('expAssign',  r'\*\*='),
@@ -255,7 +255,7 @@ def parse(expr):
     if symbolCheck('ERROR', 0, tokens):
         return 'Syntax error: ' + tokens[0].attrib
     try:
-        lineNode = line(tokens)
+        lineNode = linevimcalc(tokens)
         if lineNode.success:
             if lineNode.storeInAns:
                 storeSymbol('ans', lineNode.result)
@@ -289,7 +289,8 @@ def process(result):
         return 'ERROR'
 
 
-def line(tokens):
+#Rename from line because there is an interference with plugin VOoM
+def linevimcalc(tokens):
     directiveNode = directive(tokens)
     if directiveNode.success:
         if directiveNode.consumeCount == len(tokens):
