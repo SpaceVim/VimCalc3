@@ -5,9 +5,9 @@
 
 "TODO: move most of the functionality to autoload script if gets more complicated
 
-if has('python')
+if has('python3')
     let scriptdirpy = expand("<sfile>:h") . '/'
-    exec "pyfile " . scriptdirpy . "vimcalc.py"
+    exec "py3file " . scriptdirpy . "vimcalc.py"
 endif
 
 if exists('g:loaded_vimcalc') || v:version < 700
@@ -110,13 +110,13 @@ function! s:VCalc_DefineMappingsAndAutoCommands()
     inoremap <buffer> <silent> <CR> <C-o>:call <SID>VCalc_REPL(1)<CR>
 
     "inserting a new line jumps to the prompt
-    nmap <buffer> <silent> o :call <SID>VCalc_JumpToPrompt(1)<CR>
-    nmap <buffer> <silent> O :call <SID>VCalc_JumpToPrompt(1)<CR>
+    nnoremap <buffer> <silent> o :call <SID>VCalc_JumpToPrompt(1)<CR>
+    nnoremap <buffer> <silent> O :call <SID>VCalc_JumpToPrompt(1)<CR>
 
-    nmap <buffer> <silent> <F1> :help vimcalc-function-list<CR>
+    nnoremap <buffer> <silent> <F1> :help vimcalc-function-list<CR>
 
-    imap <buffer> <silent> <up> <C-o>:call <SID>VCalc_PreviousHistory()<CR>
-    imap <buffer> <silent> <down> <C-o>:call <SID>VCalc_NextHistory()<CR>
+    inoremap <buffer> <silent> <up> <C-o>:call <SID>VCalc_PreviousHistory()<CR>
+    inoremap <buffer> <silent> <down> <C-o>:call <SID>VCalc_NextHistory()<CR>
 
     au BufEnter <buffer> :call <SID>VCalc_InsertOnEnter()
 
@@ -124,8 +124,8 @@ function! s:VCalc_DefineMappingsAndAutoCommands()
 endfunction
 
 function! s:VCalc_ValidateVim()
-    if has('python') != 1
-        echohl WarningMsg | echomsg "VCalc requires the Python interface to be installed." | echohl None
+    if has('python3') != 1
+        echohl WarningMsg | echomsg "VCalc requires the Python 3 interface to be installed." | echohl None
         return -1
     endif
 
@@ -143,7 +143,7 @@ function! s:VCalc_REPL(continueInsert)
 
     call <SID>VCalc_RecordHistory(expr)
     "TODO: this breaks if a double quoted string is inputed.
-    exe "python repl(\"" . expr . "\")"
+    exe "python3 repl(\"" . expr . "\")"
 
     "if executed command don't continue -- may be a ':q'
     if exists("w:vcalc_vim_command")
@@ -196,33 +196,33 @@ endfunction
 
 function! s:VCalc_CreateCWInsertMappings()
     if g:VCalc_CWInsert
-        imap <buffer> <silent> <C-W>l <ESC><C-W>l
-        imap <buffer> <silent> <C-W>k <ESC><C-W>k
-        imap <buffer> <silent> <C-W>j <ESC><C-W>j
-        imap <buffer> <silent> <C-W>h <ESC><C-W>h
-        imap <buffer> <silent> <C-W>b <ESC><C-W>b
-        imap <buffer> <silent> <C-W>t <ESC><C-W>t
-        imap <buffer> <silent> <C-W>w <ESC><C-W>w
-        imap <buffer> <silent> <C-W>W <ESC><C-W>W
+        inoremap <buffer> <silent> <C-W>l <ESC><C-W>l
+        inoremap <buffer> <silent> <C-W>k <ESC><C-W>k
+        inoremap <buffer> <silent> <C-W>j <ESC><C-W>j
+        inoremap <buffer> <silent> <C-W>h <ESC><C-W>h
+        inoremap <buffer> <silent> <C-W>b <ESC><C-W>b
+        inoremap <buffer> <silent> <C-W>t <ESC><C-W>t
+        inoremap <buffer> <silent> <C-W>w <ESC><C-W>w
+        inoremap <buffer> <silent> <C-W>W <ESC><C-W>W
         "for lazy fingers:
-        imap <buffer> <silent> <C-W><c-l> <ESC><C-W>l
-        imap <buffer> <silent> <C-W><c-k> <ESC><C-W>k
-        imap <buffer> <silent> <C-W><c-j> <ESC><C-W>j
-        imap <buffer> <silent> <C-W><c-h> <ESC><C-W>h
-        imap <buffer> <silent> <C-W><c-b> <ESC><C-W>b
-        imap <buffer> <silent> <C-W><c-t> <ESC><C-W>t
-        imap <buffer> <silent> <C-W><c-w> <ESC><C-W>w
-        imap <buffer> <silent> <C-W><c-W> <ESC><C-W>W
+        inoremap <buffer> <silent> <C-W><c-l> <ESC><C-W>l
+        inoremap <buffer> <silent> <C-W><c-k> <ESC><C-W>k
+        inoremap <buffer> <silent> <C-W><c-j> <ESC><C-W>j
+        inoremap <buffer> <silent> <C-W><c-h> <ESC><C-W>h
+        inoremap <buffer> <silent> <C-W><c-b> <ESC><C-W>b
+        inoremap <buffer> <silent> <C-W><c-t> <ESC><C-W>t
+        inoremap <buffer> <silent> <C-W><c-w> <ESC><C-W>w
+        inoremap <buffer> <silent> <C-W><c-W> <ESC><C-W>W
     endif
 endfunction
 
 " **********************************************************************************************************
-" **** PYTHON **********************************************************************************************
+" **** PYTHON 3 ********************************************************************************************
 " **********************************************************************************************************
 
-if has('python')
+if has('python3')
 
-python << EOF
+python3 << EOF
 
 import vim
 

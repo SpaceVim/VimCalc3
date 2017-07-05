@@ -1,22 +1,29 @@
-#Readme
+VimCalc3
+========
+
+This is port of VimCalc (https://github.com/gregsexton/VimCalc) to Python 3.
+Some of the Vims out there have only +python3, hence this port (of very useful
+plugin).
 
 ##Introduction
 
-VimCalc provides a convenient way to access a powerful interactive calculator
+VimCalc3 provides a convenient way to access a powerful interactive calculator
 whilst inside a Vim session. Quickly rattle off a few sums to test an idea.
 Perform complex calculations using built-in functions to validate answers.
 Quickly and simply convert from octal to hex to decimal and back again. Setup
 a bunch of variables to be used in a complex expression. Change variables
 easily and then simply re-evaluate the expression. Whatever you may need a
-calculator for, VimCalc is up to the task.
+calculator for, VimCalc3 is up to the task.
 
-Not only can VimCalc calculate but it uses Vim for input and editing. Quickly
+Not only can VimCalc3 calculate but it uses Vim for input and editing. Quickly
 and easily perform edits on previous calculations using the power of Vim and
 then re-evaluate them by simply hitting return. Once you've got the answers yank
 them into several registers and paste with ease into other buffers!
 
-Here are some example expressions run in a VimCalc session:
-    
+Type :Calc to open a new window containing the VimCalc3 buffer.
+
+Here are some example expressions run in a VimCalc3 session:
+
     > 5+4
     ans = 9.0
     > let x = 4
@@ -46,19 +53,19 @@ equation:
 
 ###Requirements
 
-  * Vim 7.0+ with +python.
-  * Python installed.
+  * Vim 7.0+ with +python3.
+  * Python 3 installed.
 
-If you're compiling Vim from source, be sure to use the --enable-pythoninterp
+If you're compiling Vim from source, be sure to use the --enable-python3interp
 option. Otherwise check your OS's package distro for a version of Vim with
-Python support. On OS X the best option is MacVim. VimCalc should work on
-Windows too, you will need to install the correct python dll for the version
+Python 3 support. On OS X the best option is MacVim. VimCalc3 should work on
+Windows too, you will need to install the correct python 3 dll for the version
 of Vim you are using. Please see the web for help with this.
 
 ###Installation
 
-Download the latest source from https://github.com/gregsexton/VimCalc.
+Download the latest source from https://github.com/fedorenchik/VimCalc3.
 
 Extract (or copy) all of the files into your Vim runtime directory, ensuring
 that they are placed into the correct subdirectories. Then update your help
-tags file to enable VimCalc help. See :help add-local-help in Vim for details.
+tags file to enable VimCalc3 help. See :help add-local-help in Vim for details.

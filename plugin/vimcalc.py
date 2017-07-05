@@ -153,7 +153,7 @@ def tokenize(expr):
                 matchedLexeme = True
                 break
         if not matchedLexeme: return [Token('ERROR', expr)]
-    return filter(lambda t: t.ID != 'whitespace', tokens)
+    return [t for t in tokens if t.ID != 'whitespace']
 
 #returns the match if regex matches beginning of string
 #otherwise returns the emtpy string
@@ -267,7 +267,7 @@ def parse(expr):
                     return lineNode.assignedSymbol + ' = ' + process(lineNode.result)
         else:
             return 'Parse error: the expression is invalid.'
-    except ParseException, pe:
+    except ParseException as pe:
         return 'Parse error: ' + pe.message
 
 #this function returns an output string based on the global repl directives
@@ -277,7 +277,7 @@ def process(result):
     elif VCALC_OUTPUT_BASE == 'hexadecimal':
         return str(hex(int(result)))
     elif VCALC_OUTPUT_BASE == 'octal':
-        return str(oct(int(result)))
+        return re.sub('0[Oo]|0[0o]0', '0', str(oct(int(result))))
     else:
         return 'ERROR'
 
@@ -343,7 +343,7 @@ def directive(tokens):
 def assign(tokens):
     if symbolCheck('ident', 0, tokens):
         assignPos = 1
-    elif map(getID, tokens[0:2]) == ['let', 'ident']:
+    elif list(map(getID, tokens[0:2])) == ['let', 'ident']:
         assignPos = 2
     else:
         return ParseNode(False, 0, 0)
@@ -379,7 +379,7 @@ def assign(tokens):
             elif symbolCheck('expAssign', assignPos, tokens):
                 result = result ** exprNode.result
             else:
-                return ParseNode(False,0,assignPos)
+                return ParseNode(False, 0, assignPos)
 
         storeSymbol(symbol, result)
         node = ParseNode(True, result, exprNode.consumeCount+assignPos+1)
@@ -394,8 +394,8 @@ def expr(tokens):
     consumed = termNode.consumeCount
     if termNode.success:
         foldNode = foldlParseMult(term,
-                                  [lambda x,y:x+y, lambda x,y:x-y],
-                                  ['plus','subtract'],
+                                  [lambda x, y:x+y, lambda x, y:x-y],
+                                  ['plus', 'subtract'],
                                   termNode.result,
                                   tokens[consumed:])
         consumed += foldNode.consumeCount
@@ -404,20 +404,20 @@ def expr(tokens):
         return ParseNode(False, 0, consumed)
 
 def func(tokens):
-    if map(getID, tokens[0:2]) == ['ident', 'lParen']:
+    if list(map(getID, tokens[0:2])) == ['ident', 'lParen']:
         sym = tokens[0].attrib
         argsNode = args(tokens[2:])
         if symbolCheck('rParen', argsNode.consumeCount+2, tokens):
             try:
-                result = apply(lookupFunc(sym), argsNode.result)
+                result = lookupFunc(sym)(*argsNode.result)
                 return ParseNode(True, result, argsNode.consumeCount+3)
-            except TypeError, e:
-                raise ParseException, (str(e), argsNode.consumeCount+3)
-            except ValueError, e:
-                raise ParseException, (str(e), argsNode.consumeCount+3)
+            except TypeError as e:
+                raise ParseException(str(e), argsNode.consumeCount+3)
+            except ValueError as e:
+                raise ParseException(str(e), argsNode.consumeCount+3)
         else:
             error = 'missing matching parenthesis for function ' + sym + '.'
-            raise ParseException, (error, argsNode.consumeCount+2)
+            raise ParseException(error, argsNode.consumeCount+2)
     else:
         return ParseNode(False, 0, 0)
 
@@ -436,11 +436,13 @@ def term(tokens):
     consumed = factNode.consumeCount
     if factNode.success:
         foldNode = foldlParseMult(factor,
-                                  [lambda x,y:x*y, lambda x,y:x/y, lambda x,y:x%y,
-                                      lambda x,y:int(x)&int(y),
-                                      lambda x,y:int(x)|int(y),
-                                      lambda x,y:int(x)^int(y),
-                                      lambda x,y:int(x)<<int(y), lambda x,y:int(x)>>int(y)],
+                                  [lambda x, y:x*y,
+                                      lambda x, y: x/y if VCALC_OUTPUT_PRECISION == 'float' else x//y,
+                                      lambda x, y:x%y,
+                                      lambda x, y:int(x)&int(y),
+                                      lambda x, y:int(x)|int(y),
+                                      lambda x, y:int(x)^int(y),
+                                      lambda x, y:int(x)<<int(y), lambda x, y:int(x)>>int(y)],
                                   ['multiply', 'divide', 'modulo', 'and', 'or',
                                       'xor', 'lShift', 'rShift'],
                                   factNode.result,
@@ -458,7 +460,7 @@ def factor(tokens):
     consumed = exptNode.consumeCount
     result = exptNode.result
     if exptNode.success:
-        foldNode = foldrParse(expt, lambda x,y:x**y, 'exponent', result, tokens[consumed:])
+        foldNode = foldrParse(expt, lambda x, y:x**y, 'exponent', result, tokens[consumed:])
         return ParseNode(foldNode.success, foldNode.result, consumed+foldNode.consumeCount)
     else:
         return ParseNode(False, 0, consumed)
@@ -488,7 +490,7 @@ def expt(tokens):
                 return ParseNode(True, exprNode.result, exprNode.consumeCount+2)
             else:
                 error = 'missing matching parenthesis in expression.'
-                raise ParseException, (error, exprNode.consumeCount+1)
+                raise ParseException(error, exprNode.consumeCount+1)
     return ParseNode(False, 0, 0)
 
 def number(tokens):
@@ -501,9 +503,9 @@ def number(tokens):
             num = 0 #error
         return ParseNode(True, num, 1)
     elif symbolCheck('hexnumber', 0, tokens):
-        return ParseNode(True, long(tokens[0].attrib,16), 1)
+        return ParseNode(True, int(tokens[0].attrib, 16), 1)
     elif symbolCheck('octnumber', 0, tokens):
-        return ParseNode(True, long(tokens[0].attrib,8), 1)
+        return ParseNode(True, int(tokens[0].attrib, 8), 1)
     else:
         return ParseNode(False, 0, 0)
 
@@ -520,7 +522,7 @@ def foldlParse(parsefn, resfn, symbol, initial, tokens):
             consumed += parseNode.consumeCount+1
             if parseNode.success:
                 result = resfn(result, parseNode.result)
-                if consumed >= len(tokens): return ParseNode(True,result,consumed)
+                if consumed >= len(tokens): return ParseNode(True, result, consumed)
             else:
                 return ParseNode(False, 0, consumed)
         return ParseNode(True, result, consumed)
@@ -537,7 +539,7 @@ def foldlParseMult(parsefn, resfns, syms, initial, tokens):
             if parseNode.success:
                 result = parseNode.result
                 consumed += parseNode.consumeCount
-                if consumed >= len(tokens): return ParseNode(True,result,consumed)
+                if consumed >= len(tokens): return ParseNode(True, result, consumed)
             else:
                 return ParseNode(False, 0, consumed)
         return ParseNode(True, result, consumed)
@@ -572,12 +574,11 @@ def variablesMessage():
     msg = "VARIABLES:\n----------\n"
     #find the longest variable length for alignment
     width = 0
-    for k in VCALC_SYMBOL_TABLE.keys():
+    for k in list(VCALC_SYMBOL_TABLE.keys()):
         width = max(width, len(k))
 
-    items = VCALC_SYMBOL_TABLE.items()
-    items.sort()
-    for k,v in items:
+    items = sorted(VCALC_SYMBOL_TABLE.items())
+    for k, v in items:
         msg += " " + k.ljust(width) + " : " + process(v) + "\n"
     return msg
 
@@ -610,11 +611,11 @@ VCALC_SYMBOL_TABLE = {'ans':0,
                       'phi':1.6180339887498948482}
 
 def lookupSymbol(symbol):
-    if VCALC_SYMBOL_TABLE.has_key(symbol):
+    if symbol in VCALC_SYMBOL_TABLE:
         return VCALC_SYMBOL_TABLE[symbol]
     else:
         error = "symbol '" + symbol + "' is not defined."
-        raise ParseException, (error, 0)
+        raise ParseException(error, 0)
 
 def storeSymbol(symbol, value):
     VCALC_SYMBOL_TABLE[symbol] = value
@@ -628,21 +629,21 @@ def loge(n):
 def log2(n):
     return math.log(n, 2)
 
-def nrt(x,y):
+def nrt(x, y):
     return x**(1/y)
 
 def factorial(n):
     acc = 1
-    for i in xrange(int(n)):
+    for i in range(int(n)):
         acc *= i+1
     return acc
 
-def perms(n,k):
-    return factorial(n)/factorial(n-k)
+def perms(n, k):
+    return int(factorial(n)/factorial(n-k))
 
-def choose(n,k):
+def choose(n, k):
     denominator = factorial(k) * factorial(n-k)
-    return factorial(n)/denominator
+    return int(factorial(n)/denominator)
 
 #global built-in function table
 #NOTE: variables do not share the same namespace as functions
@@ -684,8 +685,8 @@ VCALC_FUNCTION_TABLE = {
         }
 
 def lookupFunc(symbol):
-    if VCALC_FUNCTION_TABLE.has_key(symbol):
+    if symbol in VCALC_FUNCTION_TABLE:
         return VCALC_FUNCTION_TABLE[symbol]
     else:
         error = "built-in function '" + symbol + "' does not exist."
-        raise ParseException, (error, 0)
+        raise ParseException(error, 0)
