@@ -24,7 +24,7 @@ syntax match vcalcDirectives "\(:hex\|:oct\|:dec\|:int\|:float\|:status\|:s\|:va
 syntax match vcalcOps "\*\*=\|%=\|/=\|\*=\|-=\|+=\|<<\|>>\|\*\*\|=\|!\|%\|/\|\*\|-\|+"
 syntax match vcalcDelim "(\|)"
 
-syntax match vcalcDecNum "[0-9]*\.\?\([0-9]\+\)\?\(e[+-]\?[0-9]\+\)\?"
+syntax match vcalcDecNum "[0-9]*\.\?\([0-9]\+\)\?\([eE][+-]\?[0-9]\+\)\?"
 syntax match vcalcHexNum "0x[0-9a-fA-F]\+"
 syntax match vcalcOctNum "0[0-7]\+"
 
