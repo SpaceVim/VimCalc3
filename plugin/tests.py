@@ -52,6 +52,9 @@ class OperatorTestCase(unittest.TestCase):
     def testComplicatedNested(self):
         self.assertEqual(vimcalc.parse("sin(sqrt(((pi/2)*2)**2)/2-(3-3))"),  "ans = 1.0")
 
+    def testFloatFormats(self):
+        self.assertEqual(vimcalc.parse(".5"), "ans = 0.5")
+
 class OperatorPrecedenceTestCase(unittest.TestCase):
     #this could do with being better in every way.
     def testAllPrecedenceAtOnce(self):
