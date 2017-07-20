@@ -5,7 +5,8 @@ This is port of VimCalc (https://github.com/gregsexton/VimCalc) to Python 3.
 Some of the Vims out there have only +python3, hence this port (of very useful
 plugin).
 
-##Introduction
+Introduction
+------------
 
 VimCalc3 provides a convenient way to access a powerful interactive calculator
 whilst inside a Vim session. Quickly rattle off a few sums to test an idea.
@@ -49,9 +50,10 @@ equation:
     > ((b*-1) - sqrt(b**2 - 4*a*c))/(2*a)
     ans = -1.5
 
-##Installation
+Installation
+------------
 
-###Requirements
+### Requirements
 
   * Vim 7.0+ with +python3.
   * Python 3 installed.
@@ -62,10 +64,12 @@ Python 3 support. On OS X the best option is MacVim. VimCalc3 should work on
 Windows too, you will need to install the correct python 3 dll for the version
 of Vim you are using. Please see the web for help with this.
 
-###Installation
+### Installation
 
-Download the latest source from https://github.com/fedorenchik/VimCalc3.
+If you don't have a preferred installation method, I recommend using Vim's
+packages feature, simply copy and paste:
 
-Extract (or copy) all of the files into your Vim runtime directory, ensuring
-that they are placed into the correct subdirectories. Then update your help
-tags file to enable VimCalc3 help. See :help add-local-help in Vim for details.
+	mkdir -p ~/.vim/pack/bundle/start
+	cd ~/.vim/pack/bundle/start
+	git clone https://github.com/fedorenchik/VimCalc3.git
+
