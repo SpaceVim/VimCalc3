@@ -1,11 +1,12 @@
-#AUTHOR:   Greg Sexton <gregsexton@gmail.com>
-#WEBSITE:  https://github.com/gregsexton/VimCalc
-#VERSION:  1.3, for Vim 7.0+
-#LICENSE:  Same terms as Vim itself (see :help license).
+# CURRENT MAINTAINER:  Leonid V. Fedorenchik <leonidsbox@gmail.com>
+# ORIGINAL AUTHOR:     Greg Sexton <gregsexton@gmail.com>
+# WEBSITE:             https://github.com/fedorenchik/VimCalc3
+# VERSION:             3.2, for Vim 7.0+
+# LICENSE:             Same terms as Vim itself (see :help license).
 
 import math, re, random
 
-#### LEXICAL ANALYSIS FUNCTIONS ##################################################
+#### LEXICAL ANALYSIS FUNCTIONS ################################################
 
 #lexemes
 #digit  = [0-9]
@@ -71,7 +72,7 @@ import math, re, random
 #quitDir    = ':q'
 #directives = decDir | hexDir | octDir | intDir | floatDir | statusDir | varDir | quitDir
 
-class Token(object):
+class VimCalcToken(object):
     def __init__(self, tokenID, attrib):
         self._tokenID = tokenID
         self._attrib = attrib
@@ -83,10 +84,10 @@ class Token(object):
         return self._tokenID
     def getAttrib(self):
         return self._attrib
-    ID = property(getID, doc='Token ID [string].')
-    attrib = property(getAttrib, doc='Token attribute [string].')
+    ID = property(getID, doc='VimCalcToken ID [string].')
+    attrib = property(getAttrib, doc='VimCalcToken attribute [string].')
 
-class Lexeme(object):
+class VimCalcLexeme(object):
     def __init__(self, identifier, regex):
         self._ID = identifier
         self._regex = regex
@@ -94,70 +95,70 @@ class Lexeme(object):
         return self._ID
     def getRegex(self):
         return self._regex
-    ID = property(getID, doc='Lexeme ID [string].')
-    regex = property(getRegex, doc='Regex to match the Lexeme.')
+    ID = property(getID, doc='VimCalcLexeme ID [string].')
+    regex = property(getRegex, doc='Regex to match the VimCalcLexeme.')
 
 #language lexemes NOTE: don't change these without changing syntax file
-lexemes = [Lexeme('whitespace', r'\s+'),
-           Lexeme('hexnumber',  r'0x[0-9a-fA-F]+'),
-           Lexeme('octnumber',  r'0[0-7]+'),
-           Lexeme('decnumber',  r'[0-9]*\.?([0-9]+)?([eE][+-]?[0-9]+)?'),
-           Lexeme('let',        r'let'),
-           Lexeme('ident',      r"[A-Za-z_][A-Za-z0-9_]*'?"),
-           Lexeme('expAssign',  r'\*\*='),
-           Lexeme('modAssign',  r'%='),
-           Lexeme('dAssign',    r'/='),
-           Lexeme('mAssign',    r'\*='),
-           Lexeme('sAssign',    r'-='),
-           Lexeme('pAssign',    r'\+='),
-           Lexeme('andAssign',  r'\&='),
-           Lexeme('orAssign',   r'\|='),
-           Lexeme('xorAssign',  r'\^='),
-           Lexeme('lShift',     r'<<'),
-           Lexeme('rShift',     r'>>'),
-           Lexeme('exponent',   r'\*\*'),
-           Lexeme('assign',     r'='),
-           Lexeme('comma',      r','),
-           Lexeme('lParen',     r'\('),
-           Lexeme('rParen',     r'\)'),
-           Lexeme('factorial',  r'!'),
-           Lexeme('modulo',     r'%'),
-           Lexeme('divide',     r'/'),
-           Lexeme('multiply',   r'\*'),
-           Lexeme('subtract',   r'-'),
-           Lexeme('plus',       r'\+'),
-           Lexeme('and',        r'\&'),
-           Lexeme('or',         r'\|'),
-           Lexeme('xor',        r'\^'),
-           Lexeme('decDir',     r':dec'),
-           Lexeme('hexDir',     r':hex'),
-           Lexeme('octDir',     r':oct'),
-           Lexeme('statusDir',  r':status'),
-           Lexeme('statusDir',  r':s'),         #shorthand
-           Lexeme('varDir',     r':vars'),
-           Lexeme('quitDir',    r':q'),
-           Lexeme('intDir',     r':int'),
-           Lexeme('floatDir',   r':float') ]
+vimcalc_lexemes = [VimCalcLexeme('whitespace', r'\s+'),
+                   VimCalcLexeme('hexnumber',  r'0x[0-9a-fA-F]+'),
+                   VimCalcLexeme('octnumber',  r'0[0-7]+'),
+                   VimCalcLexeme('decnumber',  r'[0-9]*\.?([0-9]+)?([eE][+-]?[0-9]+)?'),
+                   VimCalcLexeme('let',        r'let'),
+                   VimCalcLexeme('ident',      r"[A-Za-z_][A-Za-z0-9_]*'?"),
+                   VimCalcLexeme('expAssign',  r'\*\*='),
+                   VimCalcLexeme('modAssign',  r'%='),
+                   VimCalcLexeme('dAssign',    r'/='),
+                   VimCalcLexeme('mAssign',    r'\*='),
+                   VimCalcLexeme('sAssign',    r'-='),
+                   VimCalcLexeme('pAssign',    r'\+='),
+                   VimCalcLexeme('andAssign',  r'\&='),
+                   VimCalcLexeme('orAssign',   r'\|='),
+                   VimCalcLexeme('xorAssign',  r'\^='),
+                   VimCalcLexeme('lShift',     r'<<'),
+                   VimCalcLexeme('rShift',     r'>>'),
+                   VimCalcLexeme('exponent',   r'\*\*'),
+                   VimCalcLexeme('assign',     r'='),
+                   VimCalcLexeme('comma',      r','),
+                   VimCalcLexeme('lParen',     r'\('),
+                   VimCalcLexeme('rParen',     r'\)'),
+                   VimCalcLexeme('factorial',  r'!'),
+                   VimCalcLexeme('modulo',     r'%'),
+                   VimCalcLexeme('divide',     r'/'),
+                   VimCalcLexeme('multiply',   r'\*'),
+                   VimCalcLexeme('subtract',   r'-'),
+                   VimCalcLexeme('plus',       r'\+'),
+                   VimCalcLexeme('and',        r'\&'),
+                   VimCalcLexeme('or',         r'\|'),
+                   VimCalcLexeme('xor',        r'\^'),
+                   VimCalcLexeme('decDir',     r':dec'),
+                   VimCalcLexeme('hexDir',     r':hex'),
+                   VimCalcLexeme('octDir',     r':oct'),
+                   VimCalcLexeme('statusDir',  r':status'),
+                   VimCalcLexeme('statusDir',  r':s'),         #shorthand
+                   VimCalcLexeme('varDir',     r':vars'),
+                   VimCalcLexeme('quitDir',    r':q'),
+                   VimCalcLexeme('intDir',     r':int'),
+                   VimCalcLexeme('floatDir',   r':float') ]
 
 #takes an expression and uses the language lexemes
 #to produce a sequence of tokens
-def tokenize(expr):
+def vimcalc_tokenize(expr):
     tokens = []
     while expr != '':
         matchedLexeme = False
-        for lexeme in lexemes:
-            match = matchesFront(lexeme.regex, expr)
+        for lexeme in vimcalc_lexemes:
+            match = vimcalc_matchesFront(lexeme.regex, expr)
             if match != '':
-                tokens.append(Token(lexeme.ID, match))
+                tokens.append(VimCalcToken(lexeme.ID, match))
                 expr = expr[len(match):]
                 matchedLexeme = True
                 break
-        if not matchedLexeme: return [Token('ERROR', expr)]
+        if not matchedLexeme: return [VimCalcToken('ERROR', expr)]
     return [t for t in tokens if t.ID != 'whitespace']
 
 #returns the match if regex matches beginning of string
 #otherwise returns the emtpy string
-def matchesFront(regex, string):
+def vimcalc_matchesFront(regex, string):
     rexp = re.compile(regex)
     m = rexp.match(string)
     if m:
@@ -165,14 +166,14 @@ def matchesFront(regex, string):
     else:
         return ''
 
-#useful for testing tokenize with map(...)
-def getAttrib(token):
+#useful for testing vimcalc_tokenize with map(...)
+def vimcalc_getAttrib(token):
     return token.attrib
 
-def getID(token):
+def vimcalc_getID(token):
     return token.ID
 
-#### PARSER FUNCTIONS ############################################################
+#### PARSER FUNCTIONS ##########################################################
 
 #TODO: this is all a bit messy due to passing essentially a vector around
 # instead of a list and not having shared state. Could be made a
@@ -205,7 +206,7 @@ def getID(token):
 #expt       -> func | ident | - number | number | ( expr )
 #number     -> decnumber | hexnumber | octalnumber
 
-class ParseNode(object):
+class VimCalcParseNode(object):
     def __init__(self, success, result, consumedTokens):
         self._success = success
         self._result = result
@@ -237,7 +238,7 @@ class ParseNode(object):
     assignedSymbol = property(getAssignedSymbol, setAssignedSymbol,
                               doc='Symbol expression assigned to.')
 
-class ParseException(Exception):
+class VimCalcParseException(Exception):
     def __init__(self, message, consumedTokens):
         self._message = message
         self._consumed = consumedTokens
@@ -248,197 +249,197 @@ class ParseException(Exception):
     message = property(getMessage)
     consumed = property(getConsumed)
 
-#recursive descent parser -- simple and befitting the needs of this small program
-#generates the parse tree with evaluated decoration
-def parse(expr):
-    tokens = tokenize(expr)
-    if symbolCheck('ERROR', 0, tokens):
+# recursive descent parser -- simple and befitting the needs of this small
+# program generates the parse tree with evaluated decoration
+def vimcalc_parse(expr):
+    tokens = vimcalc_tokenize(expr)
+    if vimcalc_symbolCheck('ERROR', 0, tokens):
         return 'Syntax error: ' + tokens[0].attrib
     try:
-        lineNode = linevimcalc(tokens)
+        lineNode = vimcalc_line(tokens)
         if lineNode.success:
             if lineNode.storeInAns:
-                storeSymbol('ans', lineNode.result)
-                return 'ans = ' + process(lineNode.result)
+                vimcalc_storeSymbol('ans', lineNode.result)
+                return 'ans = ' + vimcalc_process(lineNode.result)
             else:
                 if lineNode.assignedSymbol == None:
                     return str(lineNode.result)
                 else:
-                    return lineNode.assignedSymbol + ' = ' + process(lineNode.result)
+                    return lineNode.assignedSymbol + ' = ' + vimcalc_process(lineNode.result)
         else:
             return 'Parse error: the expression is invalid.'
-    except ParseException as pe:
+    except VimCalcParseException as pe:
         return 'Parse error: ' + pe.message
 
 #this function returns an output string based on the global repl directives
-def process(result):
-    if VCALC_OUTPUT_BASE == 'decimal':
+def vimcalc_process(result):
+    if VIMCALC_OUTPUT_BASE == 'decimal':
         output = result
-    elif VCALC_OUTPUT_BASE == 'hexadecimal':
+    elif VIMCALC_OUTPUT_BASE == 'hexadecimal':
         return str(hex(int(result)))
-    elif VCALC_OUTPUT_BASE == 'octal':
+    elif VIMCALC_OUTPUT_BASE == 'octal':
         return re.sub('0[Oo]|0[0o]0', '0', str(oct(int(result))))
     else:
         return 'ERROR'
 
-    if VCALC_OUTPUT_PRECISION == 'int':
+    if VIMCALC_OUTPUT_PRECISION == 'int':
         return str(int(output))
-    elif VCALC_OUTPUT_PRECISION == 'float':
+    elif VIMCALC_OUTPUT_PRECISION == 'float':
         return str(output)
     else:
         return 'ERROR'
 
 
-#Rename from line because there is an interference with plugin VOoM
-def linevimcalc(tokens):
-    directiveNode = directive(tokens)
+# Rename from line because there is an interference with plugin VOoM.
+def vimcalc_line(tokens):
+    directiveNode = vimcalc_directive(tokens)
     if directiveNode.success:
         if directiveNode.consumeCount == len(tokens):
             return directiveNode
         else:
-            return ParseNode(False, 0, directiveNode.consumeCount)
-    assignNode = assign(tokens)
+            return VimCalcParseNode(False, 0, directiveNode.consumeCount)
+    assignNode = vimcalc_assign(tokens)
     if assignNode.success:
         if assignNode.consumeCount == len(tokens):
             return assignNode
         else:
-            return ParseNode(False, 0, assignNode.consumeCount)
-    exprNode = expr(tokens)
+            return VimCalcParseNode(False, 0, assignNode.consumeCount)
+    exprNode = vimcalc_expr(tokens)
     if exprNode.success:
         if exprNode.consumeCount == len(tokens):
             return exprNode
         else:
-            return ParseNode(False, 0, exprNode.consumeCount)
-    return ParseNode(False, 0, 0)
+            return VimCalcParseNode(False, 0, exprNode.consumeCount)
+    return VimCalcParseNode(False, 0, 0)
 
-VCALC_OUTPUT_BASE      = 'decimal'
-VCALC_OUTPUT_PRECISION = 'float'
+VIMCALC_OUTPUT_BASE      = 'decimal'
+VIMCALC_OUTPUT_PRECISION = 'float'
 
-def directive(tokens):
+def vimcalc_directive(tokens):
     #TODO: refactor this -- extract method
-    global VCALC_OUTPUT_BASE
-    global VCALC_OUTPUT_PRECISION
-    if symbolCheck('decDir', 0, tokens):
-        VCALC_OUTPUT_BASE = 'decimal'
-        return createDirectiveParseNode('CHANGED OUTPUT BASE TO DECIMAL.')
-    if symbolCheck('hexDir', 0, tokens):
-        VCALC_OUTPUT_BASE = 'hexadecimal'
-        return createDirectiveParseNode('CHANGED OUTPUT BASE TO HEXADECIMAL.')
-    if symbolCheck('octDir', 0, tokens):
-        VCALC_OUTPUT_BASE = 'octal'
-        return createDirectiveParseNode('CHANGED OUTPUT BASE TO OCTAL.')
-    if symbolCheck('floatDir', 0, tokens):
-        VCALC_OUTPUT_PRECISION = 'float'
-        return createDirectiveParseNode('CHANGED OUTPUT PRECISION TO FLOATING POINT.')
-    if symbolCheck('intDir', 0, tokens):
-        VCALC_OUTPUT_PRECISION = 'int'
-        return createDirectiveParseNode('CHANGED OUTPUT PRECISION TO INTEGER.')
-    if symbolCheck('statusDir', 0, tokens):
-        return createDirectiveParseNode(statusMessage())
-    if symbolCheck('varDir', 0, tokens):
-        return createDirectiveParseNode(variablesMessage())
-    if symbolCheck('quitDir', 0, tokens):
-        return createDirectiveParseNode('!!!q!!!')
-    return ParseNode(False, 0, 0)
+    global VIMCALC_OUTPUT_BASE
+    global VIMCALC_OUTPUT_PRECISION
+    if vimcalc_symbolCheck('decDir', 0, tokens):
+        VIMCALC_OUTPUT_BASE = 'decimal'
+        return vimcalc_createDirectiveParseNode('CHANGED OUTPUT BASE TO DECIMAL.')
+    if vimcalc_symbolCheck('hexDir', 0, tokens):
+        VIMCALC_OUTPUT_BASE = 'hexadecimal'
+        return vimcalc_createDirectiveParseNode('CHANGED OUTPUT BASE TO HEXADECIMAL.')
+    if vimcalc_symbolCheck('octDir', 0, tokens):
+        VIMCALC_OUTPUT_BASE = 'octal'
+        return vimcalc_createDirectiveParseNode('CHANGED OUTPUT BASE TO OCTAL.')
+    if vimcalc_symbolCheck('floatDir', 0, tokens):
+        VIMCALC_OUTPUT_PRECISION = 'float'
+        return vimcalc_createDirectiveParseNode('CHANGED OUTPUT PRECISION TO FLOATING POINT.')
+    if vimcalc_symbolCheck('intDir', 0, tokens):
+        VIMCALC_OUTPUT_PRECISION = 'int'
+        return vimcalc_createDirectiveParseNode('CHANGED OUTPUT PRECISION TO INTEGER.')
+    if vimcalc_symbolCheck('statusDir', 0, tokens):
+        return vimcalc_createDirectiveParseNode(vimcalc_statusMessage())
+    if vimcalc_symbolCheck('varDir', 0, tokens):
+        return vimcalc_createDirectiveParseNode(vimcalc_variablesMessage())
+    if vimcalc_symbolCheck('quitDir', 0, tokens):
+        return vimcalc_createDirectiveParseNode('!!!q!!!')
+    return VimCalcParseNode(False, 0, 0)
 
-def assign(tokens):
-    if symbolCheck('ident', 0, tokens):
+def vimcalc_assign(tokens):
+    if vimcalc_symbolCheck('ident', 0, tokens):
         assignPos = 1
-    elif list(map(getID, tokens[0:2])) == ['let', 'ident']:
+    elif list(map(vimcalc_getID, tokens[0:2])) == ['let', 'ident']:
         assignPos = 2
     else:
-        return ParseNode(False, 0, 0)
+        return VimCalcParseNode(False, 0, 0)
 
-    exprNode = expr(tokens[assignPos+1:])
+    exprNode = vimcalc_expr(tokens[assignPos+1:])
     if exprNode.consumeCount+assignPos+1 == len(tokens):
         symbol = tokens[assignPos-1].attrib
 
         #perform type of assignment
-        if symbolCheck('assign', assignPos, tokens):
+        if vimcalc_symbolCheck('assign', assignPos, tokens):
             result = exprNode.result
         else:
-            result = lookupSymbol(symbol)
-            if symbolCheck('pAssign', assignPos, tokens):
+            result = vimcalc_lookupSymbol(symbol)
+            if vimcalc_symbolCheck('pAssign', assignPos, tokens):
                 result = result + exprNode.result
-            elif symbolCheck('sAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('sAssign', assignPos, tokens):
                 result = result - exprNode.result
-            elif symbolCheck('mAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('mAssign', assignPos, tokens):
                 result = result * exprNode.result
-            elif symbolCheck('dAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('dAssign', assignPos, tokens):
                 result = result / exprNode.result
-            elif symbolCheck('modAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('modAssign', assignPos, tokens):
                 result = result % exprNode.result
 
             #arguments to bitwise operations must be plain or long integers
-            elif symbolCheck('andAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('andAssign', assignPos, tokens):
                 result = int(result) & int(exprNode.result)
-            elif symbolCheck('orAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('orAssign', assignPos, tokens):
                 result = int(result) | int(exprNode.result)
-            elif symbolCheck('xorAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('xorAssign', assignPos, tokens):
                 result = int(result) ^ int(exprNode.result)
 
-            elif symbolCheck('expAssign', assignPos, tokens):
+            elif vimcalc_symbolCheck('expAssign', assignPos, tokens):
                 result = result ** exprNode.result
             else:
-                return ParseNode(False, 0, assignPos)
+                return VimCalcParseNode(False, 0, assignPos)
 
-        storeSymbol(symbol, result)
-        node = ParseNode(True, result, exprNode.consumeCount+assignPos+1)
+        vimcalc_storeSymbol(symbol, result)
+        node = VimCalcParseNode(True, result, exprNode.consumeCount+assignPos+1)
         node.storeInAns = False
         node.assignedSymbol = symbol
         return node
     else:
-        return ParseNode(False, 0, exprNode.consumeCount+assignPos+1)
+        return VimCalcParseNode(False, 0, exprNode.consumeCount+assignPos+1)
 
-def expr(tokens):
-    termNode = term(tokens)
+def vimcalc_expr(tokens):
+    termNode = vimcalc_term(tokens)
     consumed = termNode.consumeCount
     if termNode.success:
-        foldNode = foldlParseMult(term,
+        foldNode = vimcalc_foldlParseMult(vimcalc_term,
                                   [lambda x, y:x+y, lambda x, y:x-y],
                                   ['plus', 'subtract'],
                                   termNode.result,
                                   tokens[consumed:])
         consumed += foldNode.consumeCount
-        return ParseNode(foldNode.success, foldNode.result, consumed)
+        return VimCalcParseNode(foldNode.success, foldNode.result, consumed)
     else:
-        return ParseNode(False, 0, consumed)
+        return VimCalcParseNode(False, 0, consumed)
 
-def func(tokens):
-    if list(map(getID, tokens[0:2])) == ['ident', 'lParen']:
+def vimcalc_func(tokens):
+    if list(map(vimcalc_getID, tokens[0:2])) == ['ident', 'lParen']:
         sym = tokens[0].attrib
-        argsNode = args(tokens[2:])
-        if symbolCheck('rParen', argsNode.consumeCount+2, tokens):
+        argsNode = vimcalc_args(tokens[2:])
+        if vimcalc_symbolCheck('rParen', argsNode.consumeCount+2, tokens):
             try:
-                result = lookupFunc(sym)(*argsNode.result)
-                return ParseNode(True, result, argsNode.consumeCount+3)
+                result = vimcalc_lookupFunc(sym)(*argsNode.result)
+                return VimCalcParseNode(True, result, argsNode.consumeCount+3)
             except TypeError as e:
-                raise ParseException(str(e), argsNode.consumeCount+3)
+                raise VimCalcParseException(str(e), argsNode.consumeCount+3)
             except ValueError as e:
-                raise ParseException(str(e), argsNode.consumeCount+3)
+                raise VimCalcParseException(str(e), argsNode.consumeCount+3)
         else:
             error = 'missing matching parenthesis for function ' + sym + '.'
-            raise ParseException(error, argsNode.consumeCount+2)
+            raise VimCalcParseException(error, argsNode.consumeCount+2)
     else:
-        return ParseNode(False, 0, 0)
+        return VimCalcParseNode(False, 0, 0)
 
-def args(tokens):
+def vimcalc_args(tokens):
     #returns a list of exprNodes to be used as function arguments
-    exprNode = expr(tokens)
+    exprNode = vimcalc_expr(tokens)
     consumed = exprNode.consumeCount
     if exprNode.success:
-        foldNode = foldlParse(expr, snoc, 'comma', [exprNode.result], tokens[consumed:])
-        return ParseNode(foldNode.success, foldNode.result, consumed+foldNode.consumeCount)
+        foldNode = vimcalc_foldlParse(vimcalc_expr, vimcalc_snoc, 'comma', [exprNode.result], tokens[consumed:])
+        return VimCalcParseNode(foldNode.success, foldNode.result, consumed+foldNode.consumeCount)
     else:
-        return ParseNode(False, [], consumed)
+        return VimCalcParseNode(False, [], consumed)
 
-def term(tokens):
-    factNode = factor(tokens)
+def vimcalc_term(tokens):
+    factNode = vimcalc_factor(tokens)
     consumed = factNode.consumeCount
     if factNode.success:
-        foldNode = foldlParseMult(factor,
+        foldNode = vimcalc_foldlParseMult(vimcalc_factor,
                                   [lambda x, y:x*y,
-                                      lambda x, y: x/y if VCALC_OUTPUT_PRECISION == 'float' else x//y,
+                                      lambda x, y: x/y if VIMCALC_OUTPUT_PRECISION == 'float' else x//y,
                                       lambda x, y:x%y,
                                       lambda x, y:int(x)&int(y),
                                       lambda x, y:int(x)|int(y),
@@ -449,215 +450,215 @@ def term(tokens):
                                   factNode.result,
                                   tokens[consumed:])
         consumed += foldNode.consumeCount
-        if symbolCheck('factorial', consumed, tokens):
-            return ParseNode(foldNode.success, factorial(foldNode.result), consumed+1)
+        if vimcalc_symbolCheck('factorial', consumed, tokens):
+            return VimCalcParseNode(foldNode.success, vimcalc_factorial(foldNode.result), consumed+1)
         else:
-            return ParseNode(foldNode.success, foldNode.result, consumed)
+            return VimCalcParseNode(foldNode.success, foldNode.result, consumed)
     else:
-        return ParseNode(False, 0, consumed)
+        return VimCalcParseNode(False, 0, consumed)
 
-def factor(tokens):
-    exptNode = expt(tokens)
+def vimcalc_factor(tokens):
+    exptNode = vimcalc_expt(tokens)
     consumed = exptNode.consumeCount
     result = exptNode.result
     if exptNode.success:
-        foldNode = foldrParse(expt, lambda x, y:x**y, 'exponent', result, tokens[consumed:])
-        return ParseNode(foldNode.success, foldNode.result, consumed+foldNode.consumeCount)
+        foldNode = vimcalc_foldrParse(vimcalc_expt, lambda x, y:x**y, 'exponent', result, tokens[consumed:])
+        return VimCalcParseNode(foldNode.success, foldNode.result, consumed+foldNode.consumeCount)
     else:
-        return ParseNode(False, 0, consumed)
+        return VimCalcParseNode(False, 0, consumed)
 
-def expt(tokens):
+def vimcalc_expt(tokens):
     #function
-    funcNode = func(tokens)
+    funcNode = vimcalc_func(tokens)
     if funcNode.success:
         return funcNode
     #identifier
-    if symbolCheck('ident', 0, tokens):
-        return ParseNode(True, lookupSymbol(tokens[0].attrib), 1)
+    if vimcalc_symbolCheck('ident', 0, tokens):
+        return VimCalcParseNode(True, vimcalc_lookupSymbol(tokens[0].attrib), 1)
     #unary -
-    if symbolCheck('subtract', 0, tokens):
-        numberNode = number(tokens[1:])
+    if vimcalc_symbolCheck('subtract', 0, tokens):
+        numberNode = vimcalc_number(tokens[1:])
         if numberNode.success:
-            return ParseNode(True, numberNode.result*-1, numberNode.consumeCount+1)
+            return VimCalcParseNode(True, numberNode.result*-1, numberNode.consumeCount+1)
     #plain number
-    numberNode = number(tokens)
+    numberNode = vimcalc_number(tokens)
     if numberNode.success:
         return numberNode
     #(expr)
-    if symbolCheck('lParen', 0, tokens):
-        exprNode = expr(tokens[1:])
+    if vimcalc_symbolCheck('lParen', 0, tokens):
+        exprNode = vimcalc_expr(tokens[1:])
         if exprNode.success:
-            if symbolCheck('rParen', exprNode.consumeCount+1, tokens):
-                return ParseNode(True, exprNode.result, exprNode.consumeCount+2)
+            if vimcalc_symbolCheck('rParen', exprNode.consumeCount+1, tokens):
+                return VimCalcParseNode(True, exprNode.result, exprNode.consumeCount+2)
             else:
                 error = 'missing matching parenthesis in expression.'
-                raise ParseException(error, exprNode.consumeCount+1)
-    return ParseNode(False, 0, 0)
+                raise VimCalcParseException(error, exprNode.consumeCount+1)
+    return VimCalcParseNode(False, 0, 0)
 
-def number(tokens):
-    if symbolCheck('decnumber', 0, tokens):
-        if VCALC_OUTPUT_PRECISION == 'float':
+def vimcalc_number(tokens):
+    if vimcalc_symbolCheck('decnumber', 0, tokens):
+        if VIMCALC_OUTPUT_PRECISION == 'float':
             num = float(tokens[0].attrib)
-        elif VCALC_OUTPUT_PRECISION == 'int':
+        elif VIMCALC_OUTPUT_PRECISION == 'int':
             num = int(float(tokens[0].attrib)) #int from float as string input
         else:
             num = 0 #error
-        return ParseNode(True, num, 1)
-    elif symbolCheck('hexnumber', 0, tokens):
-        return ParseNode(True, int(tokens[0].attrib, 16), 1)
-    elif symbolCheck('octnumber', 0, tokens):
-        return ParseNode(True, int(tokens[0].attrib, 8), 1)
+        return VimCalcParseNode(True, num, 1)
+    elif vimcalc_symbolCheck('hexnumber', 0, tokens):
+        return VimCalcParseNode(True, int(tokens[0].attrib, 16), 1)
+    elif vimcalc_symbolCheck('octnumber', 0, tokens):
+        return VimCalcParseNode(True, int(tokens[0].attrib, 8), 1)
     else:
-        return ParseNode(False, 0, 0)
+        return VimCalcParseNode(False, 0, 0)
 
-#### HELPER FUNCTIONS FOR USE BY THE PARSER AND REPL #############################
+#### HELPER FUNCTIONS FOR USE BY THE PARSER AND REPL ###########################
 
-def foldlParse(parsefn, resfn, symbol, initial, tokens):
+def vimcalc_foldlParse(parsefn, resfn, symbol, initial, tokens):
     consumed = 0
     result = initial
     if tokens == []:
-        return ParseNode(True, result, consumed)
+        return VimCalcParseNode(True, result, consumed)
     else:
         while tokens[consumed].ID == symbol:
             parseNode = parsefn(tokens[consumed+1:])
             consumed += parseNode.consumeCount+1
             if parseNode.success:
                 result = resfn(result, parseNode.result)
-                if consumed >= len(tokens): return ParseNode(True, result, consumed)
+                if consumed >= len(tokens): return VimCalcParseNode(True, result, consumed)
             else:
-                return ParseNode(False, 0, consumed)
-        return ParseNode(True, result, consumed)
+                return VimCalcParseNode(False, 0, consumed)
+        return VimCalcParseNode(True, result, consumed)
 
-def foldlParseMult(parsefn, resfns, syms, initial, tokens):
+def vimcalc_foldlParseMult(parsefn, resfns, syms, initial, tokens):
     consumed = 0
     result = initial
     if tokens == []:
-        return ParseNode(True, result, consumed)
+        return VimCalcParseNode(True, result, consumed)
     else:
         while tokens[consumed].ID in syms:
             sym = tokens[consumed].ID
-            parseNode = foldlParse(parsefn, resfns[syms.index(sym)], sym, result, tokens[consumed:])
+            parseNode = vimcalc_foldlParse(parsefn, resfns[syms.index(sym)], sym, result, tokens[consumed:])
             if parseNode.success:
                 result = parseNode.result
                 consumed += parseNode.consumeCount
-                if consumed >= len(tokens): return ParseNode(True, result, consumed)
+                if consumed >= len(tokens): return VimCalcParseNode(True, result, consumed)
             else:
-                return ParseNode(False, 0, consumed)
-        return ParseNode(True, result, consumed)
+                return VimCalcParseNode(False, 0, consumed)
+        return VimCalcParseNode(True, result, consumed)
 
-def foldrParse(parsefn, resfn, symbol, initial, tokens):
-    #foldlParse into a sequence and then do a foldr to evaluate
-    parseNode = foldlParse(parsefn, snoc, symbol, [], tokens)
+def vimcalc_foldrParse(parsefn, resfn, symbol, initial, tokens):
+    # vimcalc_foldlParse into a sequence and then do a vimcalc_foldr to evaluate
+    parseNode = vimcalc_foldlParse(parsefn, vimcalc_snoc, symbol, [], tokens)
     if parseNode.success:
-        result = foldr(resfn, initial, parseNode.result)
-        return ParseNode(parseNode.success, result, parseNode.consumeCount)
+        result = vimcalc_foldr(resfn, initial, parseNode.result)
+        return VimCalcParseNode(parseNode.success, result, parseNode.consumeCount)
     else:
         return parseNode
 
-def createDirectiveParseNode(outputMsg):
-    node = ParseNode(True, outputMsg, 1)
+def vimcalc_createDirectiveParseNode(outputMsg):
+    node = VimCalcParseNode(True, outputMsg, 1)
     node.storeInAns = False
     node.assignedSymbol = None
     return node
 
-def statusMessage():
-    global VCALC_OUTPUT_BASE
-    global VCALC_OUTPUT_PRECISION
+def vimcalc_statusMessage():
+    global VIMCALC_OUTPUT_BASE
+    global VIMCALC_OUTPUT_PRECISION
 
-    base = VCALC_OUTPUT_BASE.upper()
-    if VCALC_OUTPUT_PRECISION   == 'float' : precision = 'FLOATING POINT'
-    elif VCALC_OUTPUT_PRECISION == 'int'   : precision = 'INTEGER'
-    else: VCALC_OUTPUT_PRECISION = 'ERROR'
+    base = VIMCALC_OUTPUT_BASE.upper()
+    if VIMCALC_OUTPUT_PRECISION   == 'float' : precision = 'FLOATING POINT'
+    elif VIMCALC_OUTPUT_PRECISION == 'int'   : precision = 'INTEGER'
+    else: VIMCALC_OUTPUT_PRECISION = 'ERROR'
     msg = "STATUS: OUTPUT BASE: %s; PRECISION: %s." % (base, precision)
     return msg
 
-def variablesMessage():
+def vimcalc_variablesMessage():
     msg = "VARIABLES:\n----------\n"
     #find the longest variable length for alignment
     width = 0
-    for k in list(VCALC_SYMBOL_TABLE.keys()):
+    for k in list(VIMCALC_SYMBOL_TABLE.keys()):
         width = max(width, len(k))
 
-    items = sorted(VCALC_SYMBOL_TABLE.items())
+    items = sorted(VIMCALC_SYMBOL_TABLE.items())
     for k, v in items:
-        msg += " " + k.ljust(width) + " : " + process(v) + "\n"
+        msg += " " + k.ljust(width) + " : " + vimcalc_process(v) + "\n"
     return msg
 
-#rather literal haskell implementation of this, proably very
-#unpythonic and inefficient. Should do for the needs of vimcalc
-#however. TODO: in the future improve this!
-def foldr(fn, init, lst):
+# Rather literal haskell implementation of this, proably very unpythonic and
+# inefficient. Should do for the needs of vimcalc however. TODO: in the future
+# improve this!
+def vimcalc_foldr(fn, init, lst):
     if lst == []:
         return init
     else:
-        return fn(init, foldr(fn, lst[0], lst[1:]))
+        return fn(init, vimcalc_foldr(fn, lst[0], lst[1:]))
 
-def symbolCheck(symbol, index, tokens):
+def vimcalc_symbolCheck(symbol, index, tokens):
     if index < len(tokens):
         if tokens[index].ID == symbol:
             return True
     return False
 
-def snoc(seq, x):  #TODO: find more pythonic way of doing this
+def vimcalc_snoc(seq, x):  #TODO: find more pythonic way of doing this
     a = seq
     a.append(x)
     return a
 
-#### SYMBOL TABLE MANIPULATION FUNCTIONS #########################################
+#### SYMBOL TABLE MANIPULATION FUNCTIONS #######################################
 
 #global symbol table NOTE: these can be rebound
-VCALC_SYMBOL_TABLE = {'ans':0,
+VIMCALC_SYMBOL_TABLE = {'ans':0,
                         'e':math.e,
                        'pi':math.pi,
                       'phi':1.6180339887498948482}
 
-def lookupSymbol(symbol):
-    if symbol in VCALC_SYMBOL_TABLE:
-        return VCALC_SYMBOL_TABLE[symbol]
+def vimcalc_lookupSymbol(symbol):
+    if symbol in VIMCALC_SYMBOL_TABLE:
+        return VIMCALC_SYMBOL_TABLE[symbol]
     else:
         error = "symbol '" + symbol + "' is not defined."
-        raise ParseException(error, 0)
+        raise VimCalcParseException(error, 0)
 
-def storeSymbol(symbol, value):
-    VCALC_SYMBOL_TABLE[symbol] = value
+def vimcalc_storeSymbol(symbol, value):
+    VIMCALC_SYMBOL_TABLE[symbol] = value
 
 
-#### VIMCALC BUILTIN FUNCTIONS ###################################################
+#### VIMCALC BUILTIN FUNCTIONS #################################################
 
-def loge(n):
+def vimcalc_loge(n):
     return math.log(n)
 
-def log2(n):
+def vimcalc_log2(n):
     return math.log(n, 2)
 
-def nrt(x, y):
+def vimcalc_nrt(x, y):
     return x**(1/y)
 
-def factorial(n):
+def vimcalc_factorial(n):
     acc = 1
     for i in range(int(n)):
         acc *= i+1
     return acc
 
-def perms(n, k):
-    return int(factorial(n)/factorial(n-k))
+def vimcalc_perms(n, k):
+    return int(vimcalc_factorial(n)/vimcalc_factorial(n-k))
 
-def choose(n, k):
-    denominator = factorial(k) * factorial(n-k)
-    return int(factorial(n)/denominator)
+def vimcalc_choose(n, k):
+    denominator = vimcalc_factorial(k) * vimcalc_factorial(n-k)
+    return int(vimcalc_factorial(n)/denominator)
 
-#global built-in function table
+# Global built-in function table
 #NOTE: variables do not share the same namespace as functions
 #NOTE: if you change the name or add a function remember to update the syntax file
 
-VCALC_FUNCTION_TABLE = {
+VIMCALC_FUNCTION_TABLE = {
         'abs'   : math.fabs,
         'acos'  : math.acos,
         'asin'  : math.asin,
         'atan'  : math.atan,
         'atan2' : math.atan2,
         'ceil'  : math.ceil,
-        'choose': choose,
+        'choose': vimcalc_choose,
         'cos'   : math.cos,
         'cosh'  : math.cosh,
         'deg'   : math.degrees,
@@ -666,14 +667,14 @@ VCALC_FUNCTION_TABLE = {
         'hypot' : math.hypot,
         'inv'   : lambda n: 1/n,
         'ldexp' : math.ldexp,
-        'lg'    : log2,
-        'ln'    : loge,
+        'lg'    : vimcalc_log2,
+        'ln'    : vimcalc_loge,
         'log'   : math.log, #allows arbitrary base, defaults to e
         'log10' : math.log10,
         'max'   : max,
         'min'   : min,
-        'nrt'   : nrt,
-        'perms' : perms,
+        'nrt'   : vimcalc_nrt,
+        'perms' : vimcalc_perms,
         'pow'   : math.pow,
         'rad'   : math.radians,
         'rand'  : random.random, #random() -> x in the interval [0, 1).
@@ -685,9 +686,9 @@ VCALC_FUNCTION_TABLE = {
         'tanh'  : math.tanh
         }
 
-def lookupFunc(symbol):
-    if symbol in VCALC_FUNCTION_TABLE:
-        return VCALC_FUNCTION_TABLE[symbol]
+def vimcalc_lookupFunc(symbol):
+    if symbol in VIMCALC_FUNCTION_TABLE:
+        return VIMCALC_FUNCTION_TABLE[symbol]
     else:
         error = "built-in function '" + symbol + "' does not exist."
-        raise ParseException(error, 0)
+        raise VimCalcParseException(error, 0)

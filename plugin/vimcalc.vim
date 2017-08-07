@@ -143,7 +143,7 @@ function! s:VCalc_REPL(continueInsert)
 
     call <SID>VCalc_RecordHistory(expr)
     "TODO: this breaks if a double quoted string is inputed.
-    exe "python3 repl(\"" . expr . "\")"
+    exe "python3 vimcalc_repl(\"" . expr . "\")"
 
     "if executed command don't continue -- may be a ':q'
     if exists("w:vcalc_vim_command")
@@ -216,9 +216,9 @@ function! s:VCalc_CreateCWInsertMappings()
     endif
 endfunction
 
-" **********************************************************************************************************
-" **** PYTHON 3 ********************************************************************************************
-" **********************************************************************************************************
+" ******************************************************************************
+" **** PYTHON 3 ****************************************************************
+" ******************************************************************************
 
 if has('python3')
 
@@ -226,9 +226,9 @@ python3 << EOF
 
 import vim
 
-def repl(expr):
+def vimcalc_repl(expr):
     if expr != "":
-        result = parse(expr)
+        result = vimcalc_parse(expr)
         #if result is of the form: "!!!.*!!!" it is a vim command to execute.
         m = re.match(r"^!!!(.*)!!!$", result)
         if m:
