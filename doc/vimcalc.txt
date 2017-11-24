@@ -165,6 +165,9 @@ are:
     |:oct|        Puts the REPL into octal mode. All results are evaluated and
                 then converted into octal before being displayed.
 
+    |:bin|        Puts the REPL into binary mode. All results are evaluated
+                and then converted into binary before being displayed.
+
     |:int|        Puts the environment into integer mode. All results are
                 evaluated using integer precision arithmetic.
 
@@ -182,12 +185,12 @@ are:
                 like performing ':q' in normal mode. This is convenient if you
                 have the |vimcalc-insert-on-enter| option enabled.
 
-The :dec, :hex and :oct directives are particularly useful for converting
-between the different number bases. Numbers are still evaluated by the REPL
-based on how they are entered, i.e the number '10' is always the decimal
-number 10 no matter what mode the REPL is in. If you meant hexadecimal '10'
-then you must specify '0x10'. See |vimcalc-literals| for how to specify the
-different number literals. This allows for easy conversion:
+The :dec, :hex, :oct and :bin directives are particularly useful for
+converting between the different number bases. Numbers are still evaluated by
+the REPL based on how they are entered, i.e the number '10' is always the
+decimal number 10 no matter what mode the REPL is in. If you meant hexadecimal
+'10' then you must specify '0x10'. See |vimcalc-literals| for how to specify
+the different number literals. This allows for easy conversion:
 >
     > :hex
     CHANGED OUTPUT BASE TO HEXADECIMAL.
@@ -505,6 +508,10 @@ literals use the following forms.
     Octal       042         A number prefixed with a '0'. May only use the
                             digits 0-7. May only be an integer.
 
+    Binary      0b1101      A number prefixed with '0b'. May only use the
+                            digits 0 and 1. Note this is case-insensitive.
+                            May only be an integer.
+
 ==============================================================================
 7. Configuration Options                               *vimcalc-config-options*
 
@@ -574,6 +581,15 @@ the default window size.
 ==============================================================================
 8. Changelog                                                *vimcalc-changelog*
 
+3.3         Added :bin directive.
+
+3.2         Move most of the functionality to autoload directory.
+
+3.1.1       Fix bugs which led to errors when using VimCalc3 with other
+            plugins.
+
+3.1         Allow real numbers without leading zero and with capital E.
+
 3.0         Ported to Python 3.
 
 1.3         Added :int and :float directives.
@@ -609,7 +625,6 @@ The following are known limitations:
       operations).
     * No stack based calculation.
     * No window positioning.
-    * No binary (0b11000101) numbers.
 
 Hopefully, all of these features will be addressed in future releases of
 VimCalc. If you wish to develop any of these or anything else for VimCalc

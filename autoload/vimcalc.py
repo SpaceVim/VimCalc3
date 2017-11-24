@@ -1,7 +1,7 @@
 # CURRENT MAINTAINER:  Leonid V. Fedorenchik <leonidsbox@gmail.com>
 # ORIGINAL AUTHOR:     Greg Sexton <gregsexton@gmail.com>
 # WEBSITE:             https://github.com/fedorenchik/VimCalc3
-# VERSION:             3.2, for Vim 7.0+
+# VERSION:             3.3, for Vim 7.0+
 # LICENSE:             Same terms as Vim itself (see :help license).
 
 import math, re, random
@@ -24,9 +24,13 @@ import math, re, random
 #octdigit  = [0-7]
 #octdigits = octdigit+
 
+#bindigit  = [01]
+#bindigits = bindigit+
+
 #decnumber   = digits(. digits)?(e[+-]? digits)?
 #hexnumber   = 0xhexdigits
 #octalnumber = 0 octdigits
+#binnumber   = 0bbindigits
 
 #whitespace = [\t ]+
 
@@ -65,12 +69,13 @@ import math, re, random
 #decDir     = ':dec'
 #hexDir     = ':hex'
 #octDir     = ':oct'
+#binDir     = ':bin'
 #intDir     = ':int'
 #floatDir   = ':float'
 #statusDir  = ':status' | ':s'
 #varDir     = ':vars'
 #quitDir    = ':q'
-#directives = decDir | hexDir | octDir | intDir | floatDir | statusDir | varDir | quitDir
+#directives = decDir | hexDir | octDir | binDir | intDir | floatDir | statusDir | varDir | quitDir
 
 class VimCalcToken(object):
     def __init__(self, tokenID, attrib):
@@ -100,8 +105,9 @@ class VimCalcLexeme(object):
 
 #language lexemes NOTE: don't change these without changing syntax file
 vimcalc_lexemes = [VimCalcLexeme('whitespace', r'\s+'),
-                   VimCalcLexeme('hexnumber',  r'0x[0-9a-fA-F]+'),
+                   VimCalcLexeme('hexnumber',  r'0[xX][0-9a-fA-F]+'),
                    VimCalcLexeme('octnumber',  r'0[0-7]+'),
+                   VimCalcLexeme('binnumber',  r'0[bB][01]+'),
                    VimCalcLexeme('decnumber',  r'[0-9]*\.?([0-9]+)?([eE][+-]?[0-9]+)?'),
                    VimCalcLexeme('let',        r'let'),
                    VimCalcLexeme('ident',      r"[A-Za-z_][A-Za-z0-9_]*'?"),
@@ -133,6 +139,7 @@ vimcalc_lexemes = [VimCalcLexeme('whitespace', r'\s+'),
                    VimCalcLexeme('decDir',     r':dec'),
                    VimCalcLexeme('hexDir',     r':hex'),
                    VimCalcLexeme('octDir',     r':oct'),
+                   VimCalcLexeme('binDir',     r':bin'),
                    VimCalcLexeme('statusDir',  r':status'),
                    VimCalcLexeme('statusDir',  r':s'),         #shorthand
                    VimCalcLexeme('varDir',     r':vars'),
@@ -181,7 +188,7 @@ def vimcalc_getID(token):
 
 #vcalc context-free grammar
 #line      -> directive | expr | assign
-#directive -> decDir | octDir | hexDir | intDir | floatDir | statusDir | varDir | quitDir
+#directive -> decDir | octDir | hexDir | binDir | intDir | floatDir | statusDir | varDir | quitDir
 #assign    -> let assign' | assign'
 #assign'   ->  ident = expr | ident += expr | ident -= expr
 #             | ident *= expr | ident /= expr | ident %= expr | ident **= expr
@@ -192,11 +199,11 @@ def vimcalc_getID(token):
 #             | term << factor | term >> factor | term ! | factor
 #factor    -> expt ** factor | expt
 #expt      -> func | ident | - number | number | ( expr )
-#number    -> decnumber | hexnumber | octalnumber
+#number    -> decnumber | hexnumber | octalnumber | binnumber
 
 #vcalc context-free grammar LL(1) -- to be used with a recursive descent parser
 #line       -> directive | assign | expr
-#directive  -> decDir | octDir | hexDir | intDir | floatDir | statusDir | varDir | quitDir
+#directive  -> decDir | octDir | hexDir | binDir | intDir | floatDir | statusDir | varDir | quitDir
 #assign     -> [let] ident (=|+=|-=|*=|/=|%=|**=) expr
 #expr       -> term {(+|-) term}
 #func       -> ident ( args )
@@ -204,7 +211,7 @@ def vimcalc_getID(token):
 #term       -> factor {(*|/|%|<<|>>) factor} [!]
 #factor     -> {expt **} expt
 #expt       -> func | ident | - number | number | ( expr )
-#number     -> decnumber | hexnumber | octalnumber
+#number     -> decnumber | hexnumber | octalnumber | binnumber
 
 class VimCalcParseNode(object):
     def __init__(self, success, result, consumedTokens):
@@ -279,6 +286,8 @@ def vimcalc_process(result):
         return str(hex(int(result)))
     elif VIMCALC_OUTPUT_BASE == 'octal':
         return re.sub('0[Oo]|0[0o]0', '0', str(oct(int(result))))
+    elif VIMCALC_OUTPUT_BASE == 'binary':
+        return str(bin(int(result)))
     else:
         return 'ERROR'
 
@@ -328,6 +337,9 @@ def vimcalc_directive(tokens):
     if vimcalc_symbolCheck('octDir', 0, tokens):
         VIMCALC_OUTPUT_BASE = 'octal'
         return vimcalc_createDirectiveParseNode('CHANGED OUTPUT BASE TO OCTAL.')
+    if vimcalc_symbolCheck('binDir', 0, tokens):
+        VIMCALC_OUTPUT_BASE = 'binary'
+        return vimcalc_createDirectiveParseNode('CHANGED OUTPUT BASE TO BINARY.')
     if vimcalc_symbolCheck('floatDir', 0, tokens):
         VIMCALC_OUTPUT_PRECISION = 'float'
         return vimcalc_createDirectiveParseNode('CHANGED OUTPUT PRECISION TO FLOATING POINT.')
@@ -508,6 +520,8 @@ def vimcalc_number(tokens):
         return VimCalcParseNode(True, int(tokens[0].attrib, 16), 1)
     elif vimcalc_symbolCheck('octnumber', 0, tokens):
         return VimCalcParseNode(True, int(tokens[0].attrib, 8), 1)
+    elif vimcalc_symbolCheck('binnumber', 0, tokens):
+        return VimCalcParseNode(True, int(tokens[0].attrib, 2), 1)
     else:
         return VimCalcParseNode(False, 0, 0)
 

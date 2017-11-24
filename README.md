@@ -66,8 +66,10 @@ of Vim you are using. Please see the web for help with this.
 
 ### Installation
 
+Use your favourite package manager for Vim.
+
 If you don't have a preferred installation method, I recommend using Vim's
-packages feature, simply copy and paste:
+native package management support, simply copy and paste:
 
 	mkdir -p ~/.vim/pack/bundle/start
 	cd ~/.vim/pack/bundle/start

@@ -1,8 +1,9 @@
 " Vim syntax file
-"AUTHOR:   Greg Sexton <gregsexton@gmail.com>
-"WEBSITE:  https://github.com/gregsexton/VimCalc
-"VERSION:  1.3, for Vim 7.0+
-"LICENSE:  Same terms as Vim itself (see :help license).
+"CURRENT MAINTAINER:  Leonid V. Fedorenchik <leonidsbox@gmail.com>
+"ORIGINAL AUTHOR:     Greg Sexton <gregsexton@gmail.com>
+"WEBSITE:             https://github.com/fedorenchik/VimCalc3
+"VERSION:             3.3, for Vim 7.0+
+"LICENSE:             Same terms as Vim itself (see :help license).
 
 if version < 600
     syntax clear
@@ -19,14 +20,15 @@ syntax keyword vcalcLet let
 
 syntax keyword vcalcFuncs abs acos asin atan atan2 ceil choose cos cosh deg exp floor hypot inv ldexp lg ln log log10 max min nrt perms pow rad rand round sin sinh sqrt tan tanh
 
-syntax match vcalcDirectives "\(:hex\|:oct\|:dec\|:int\|:float\|:status\|:s\|:vars\|:q\)\s*$"
+syntax match vcalcDirectives "\(:hex\|:oct\|:bin\|:dec\|:int\|:float\|:status\|:s\|:vars\|:q\)\s*$"
 
 syntax match vcalcOps "\*\*=\|%=\|/=\|\*=\|-=\|+=\|<<\|>>\|\*\*\|=\|!\|%\|/\|\*\|-\|+"
 syntax match vcalcDelim "(\|)"
 
 syntax match vcalcDecNum "[0-9]*\.\?\([0-9]\+\)\?\([eE][+-]\?[0-9]\+\)\?"
-syntax match vcalcHexNum "0x[0-9a-fA-F]\+"
+syntax match vcalcHexNum "0[xX][0-9a-fA-F]\+"
 syntax match vcalcOctNum "0[0-7]\+"
+syntax match vcalcBinNum "0[bB][01]\+"
 
 syntax match vcalcSynErr "^Syntax error: .*"
 syntax match vcalcParErr "^Parse error: .*"
@@ -44,7 +46,7 @@ syntax match vcalcIntDirOutput    "CHANGED OUTPUT PRECISION TO INTEGER."
 syntax match vcalcStatusVariables display contained "DECIMAL\|HEXADECIMAL\|OCTAL\|INTEGER\|FLOATING POINT"
 syntax region vcalcStatusDirOutput start="STATUS:" end="\." contains=vcalcStatusVariables
 
-syntax region vcalcVarsDirOutput  start="^VARIABLES:$" end="^$" contains=vcalcDecNum,vcalcHexNum,vcalcOctNum
+syntax region vcalcVarsDirOutput  start="^VARIABLES:$" end="^$" contains=vcalcDecNum,vcalcHexNum,vcalcOctNum,vcalcBinNum
 
 if version >= 600
 	command -nargs=+ HiLink highlight default link <args>
@@ -79,6 +81,7 @@ HiLink vcalcDirectives  Special
 HiLink vcalcDecNum      vcalcNumber
 HiLink vcalcHexNum      vcalcNumber
 HiLink vcalcOctNum      vcalcNumber
+HiLink vcalcBinNum      vcalcNumber
 HiLink vcalcNumber      Number
 
 "Errors

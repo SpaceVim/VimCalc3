@@ -215,19 +215,37 @@ class BasesTestCase(unittest.TestCase):
         self.assertEqual(vimcalc.vimcalc_parse(":dec"),  "CHANGED OUTPUT BASE TO DECIMAL.")
         self.assertEqual(vimcalc.vimcalc_parse("10"),    "ans = 10.0")
         self.assertEqual(vimcalc.vimcalc_parse("0x10"),  "ans = 16")
+        self.assertEqual(vimcalc.vimcalc_parse("0X10"),  "ans = 16")
         self.assertEqual(vimcalc.vimcalc_parse("010"),   "ans = 8")
+        self.assertEqual(vimcalc.vimcalc_parse("0b10"),  "ans = 2")
+        self.assertEqual(vimcalc.vimcalc_parse("0B10"),  "ans = 2")
 
     def testHexadecimal(self):
         self.assertEqual(vimcalc.vimcalc_parse(":hex"),  "CHANGED OUTPUT BASE TO HEXADECIMAL.")
         self.assertEqual(vimcalc.vimcalc_parse("10"),    "ans = 0xa")
         self.assertEqual(vimcalc.vimcalc_parse("0x10"),  "ans = 0x10")
+        self.assertEqual(vimcalc.vimcalc_parse("0X10"),  "ans = 0x10")
         self.assertEqual(vimcalc.vimcalc_parse("010"),   "ans = 0x8")
+        self.assertEqual(vimcalc.vimcalc_parse("0b10"),  "ans = 0x2")
+        self.assertEqual(vimcalc.vimcalc_parse("0B10"),  "ans = 0x2")
 
     def testOctal(self):
         self.assertEqual(vimcalc.vimcalc_parse(":oct"),  "CHANGED OUTPUT BASE TO OCTAL.")
-        self.assertEqual(vimcalc.vimcalc_parse("10"),   "ans = 012")
-        self.assertEqual(vimcalc.vimcalc_parse("0x10"), "ans = 020")
-        self.assertEqual(vimcalc.vimcalc_parse("010"),  "ans = 010")
+        self.assertEqual(vimcalc.vimcalc_parse("10"),    "ans = 012")
+        self.assertEqual(vimcalc.vimcalc_parse("0x10"),  "ans = 020")
+        self.assertEqual(vimcalc.vimcalc_parse("0X10"),  "ans = 020")
+        self.assertEqual(vimcalc.vimcalc_parse("010"),   "ans = 010")
+        self.assertEqual(vimcalc.vimcalc_parse("0b10"),  "ans = 02")
+        self.assertEqual(vimcalc.vimcalc_parse("0B10"),  "ans = 02")
+
+    def testBinary(self):
+        self.assertEqual(vimcalc.vimcalc_parse(":bin"),  "CHANGED OUTPUT BASE TO BINARY.")
+        self.assertEqual(vimcalc.vimcalc_parse("10"),    "ans = 0b1010")
+        self.assertEqual(vimcalc.vimcalc_parse("0x10"),  "ans = 0b10000")
+        self.assertEqual(vimcalc.vimcalc_parse("0X10"),  "ans = 0b10000")
+        self.assertEqual(vimcalc.vimcalc_parse("010"),   "ans = 0b1000")
+        self.assertEqual(vimcalc.vimcalc_parse("0b10"),  "ans = 0b10")
+        self.assertEqual(vimcalc.vimcalc_parse("0B10"),  "ans = 0b10")
 
 class PrecisionTestCase(unittest.TestCase):
     def tearDown(self):

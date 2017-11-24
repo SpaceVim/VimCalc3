@@ -1,7 +1,8 @@
-"AUTHOR:   Greg Sexton <gregsexton@gmail.com>
-"WEBSITE:  https://github.com/gregsexton/VimCalc
-"VERSION:  1.3, for Vim 7.0+
-"LICENSE:  Same terms as Vim itself (see :help license).
+"CURRENT MAINTAINER:  Leonid V. Fedorenchik <leonidsbox@gmail.com>
+"ORIGINAL AUTHOR:     Greg Sexton <gregsexton@gmail.com>
+"WEBSITE:             https://github.com/fedorenchik/VimCalc3
+"VERSION:             3.3, for Vim 7.0+
+"LICENSE:             Same terms as Vim itself (see :help license).
 
 if exists('g:loaded_vimcalc') || v:version < 700
   finish
