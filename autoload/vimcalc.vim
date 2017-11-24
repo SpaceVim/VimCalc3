@@ -212,7 +212,7 @@ endfunction
 " ******************************************************************************
 
 if has('python3')
-
+function! VCalc_Repl()
 python3 << EOF
 
 import vim
@@ -231,5 +231,6 @@ def vimcalc_repl(expr):
                 vim.command("call append(line('$'), \"" + str + "\")")
             vim.command("if exists(\"w:vcalc_vim_command\") | unlet w:vcalc_vim_command | endif")
 EOF
-
+endfunction
+call VCalc_Repl()
 endif
