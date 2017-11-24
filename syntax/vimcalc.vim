@@ -41,6 +41,7 @@ endif
 syntax match vcalcDecDirOutput    "CHANGED OUTPUT BASE TO DECIMAL."
 syntax match vcalcHexDirOutput    "CHANGED OUTPUT BASE TO HEXADECIMAL."
 syntax match vcalcOctDirOutput    "CHANGED OUTPUT BASE TO OCTAL."
+syntax match vcalcBinDirOutput    "CHANGED OUTPUT BASE TO BINARY."
 syntax match vcalcFloatDirOutput  "CHANGED OUTPUT PRECISION TO FLOATING POINT."
 syntax match vcalcIntDirOutput    "CHANGED OUTPUT PRECISION TO INTEGER."
 syntax match vcalcStatusVariables display contained "DECIMAL\|HEXADECIMAL\|OCTAL\|INTEGER\|FLOATING POINT"
@@ -92,6 +93,7 @@ HiLink vcalcError       Error
 HiLink vcalcDecDirOutput    vcalcDirOutput
 HiLink vcalcHexDirOutput    vcalcDirOutput
 HiLink vcalcOctDirOutput    vcalcDirOutput
+HiLink vcalcBinDirOutput    vcalcDirOutput
 HiLink vcalcFloatDirOutput  vcalcDirOutput
 HiLink vcalcIntDirOutput    vcalcDirOutput
 HiLink vcalcStatusDirOutput vcalcDirOutput
