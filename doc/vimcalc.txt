@@ -1,6 +1,6 @@
 *VimCalc3* A plugin to run an interactive calculator inside a Vim buffer.
 
-Author of Port:  Leonid V. Fedorenchik <leonid@fedorenchik.ru> *vimcalc-author*
+Author of Port:  Leonid V. Fedorenchik <leonid@fedorenchik.com> *vimcalc-author*
 Original Author: Greg Sexton <gregsexton@gmail.com>
 License: Same terms as Vim itself (see |license|).
 URL:     https://github.com/fedorenchik/VimCalc3
@@ -636,7 +636,7 @@ Contributing to VimCalc couldn't be easier. If you wish to do development work
 on the code base or documentation simply fork the git repository and submit a
 pull request to me. If you discover a bug or wish to submit a feature request
 add an issue to the github page. Anything else, feel free to email me:
-leonid@fedorenchik.ru.
+leonid@fedorenchik.com.
 
 9.3 Feedback                                                 *vimcalc-feedback*
 

@@ -1,5 +1,5 @@
 " Vim syntax file
-"CURRENT MAINTAINER:  Leonid V. Fedorenchik <leonidsbox@gmail.com>
+"MAINTAINER:  Leonid V. Fedorenchik <leonid@fedorenchik.com>
 "ORIGINAL AUTHOR:     Greg Sexton <gregsexton@gmail.com>
 "WEBSITE:             https://github.com/fedorenchik/VimCalc3
 "VERSION:             3.3, for Vim 7.0+
