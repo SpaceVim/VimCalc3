@@ -5,8 +5,8 @@
 "LICENSE:             Same terms as Vim itself (see :help license).
 
 if has('python3')
-    let scriptdirpy = expand("<sfile>:h") . '/'
-    exec "py3file " . scriptdirpy . "vimcalc.py"
+    let s:scriptdirpy = expand("<sfile>:h") . '/'
+    exec "py3file " . s:scriptdirpy . "vimcalc.py"
 endif
 
 "configurable options
@@ -91,7 +91,7 @@ function! s:VCalc_SetLocalSettings()
     silent! setlocal buftype=nofile
     silent! setlocal nobuflisted
     silent! setlocal noswapfile
-    silent! setlocal bufhidden=delete
+    silent! setlocal bufhidden=wipe
     silent! setlocal nonumber
     silent! setlocal nowrap
     setlocal filetype=vimcalc
@@ -112,7 +112,7 @@ function! s:VCalc_DefineMappingsAndAutoCommands()
 
     au BufEnter <buffer> :call <SID>VCalc_InsertOnEnter()
 
-    call <SId>VCalc_CreateCWInsertMappings()
+    call <SID>VCalc_CreateCWInsertMappings()
 endfunction
 
 function! s:VCalc_ValidateVim()
