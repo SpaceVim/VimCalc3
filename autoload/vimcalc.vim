@@ -110,6 +110,9 @@ function! s:VCalc_DefineMappingsAndAutoCommands()
     inoremap <buffer> <silent> <up> <C-o>:call <SID>VCalc_PreviousHistory()<CR>
     inoremap <buffer> <silent> <down> <C-o>:call <SID>VCalc_NextHistory()<CR>
 
+    inoremap <buffer> <silent> <c-p> <C-o>:call <SID>VCalc_PreviousHistory()<CR>
+    inoremap <buffer> <silent> <c-n> <C-o>:call <SID>VCalc_NextHistory()<CR>
+
     au BufEnter <buffer> :call <SID>VCalc_InsertOnEnter()
 
     call <SID>VCalc_CreateCWInsertMappings()
